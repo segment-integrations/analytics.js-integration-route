@@ -21,11 +21,18 @@ describe('Route', function() {
     analytics.add(route);
   });
 
-  afterEach(function() {
-    analytics.restore();
-    analytics.reset();
-    sandbox();
-    route.reset();
+  afterEach(function(done) {
+    // The route script embedded in the page asynchronously embeds other scripts.
+    // This wait is needed to ensure these scripts finish loading before we clear
+    // out the environment between each test, otherwise they may reference globals
+    // which no longer exist.
+    analytics.waitForScripts(function() {
+      analytics.restore();
+      analytics.reset();
+      sandbox();
+      route.reset();
+      done();
+    });
   });
 
   it('should have the right settings', function() {
